@@ -8,7 +8,7 @@ streetlights, public facilities) which are automatically routed to the correct c
 department or police station. The system includes duplicate detection, real-time status 
 tracking, role-based access control, and a full audit trail.
 
-**GitHub Repository:** [https://github.com/missmbuvi04/final-mission-capstone.git]
+**GitHub Repository:** [https://github.com/missmbuvi04/jibu-kenya-app.git]
 **VideoDemo:**[https://screenrec.com/share/2qK7e9IAQt]
 
 ---
@@ -36,7 +36,7 @@ tracking, role-based access control, and a full audit trail.
 
 1. **Clone the repository**
 
-git clone https://github.com/missmbuvi04/final-mission-capstone.git
+git clone https://github.com/missmbuvi04/jibu-kenya-app.git
 cd final-mission-capstone
 
 2. **Create and activate virtual environment**
