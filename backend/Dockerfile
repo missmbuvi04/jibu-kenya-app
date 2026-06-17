@@ -21,11 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Tell GeoDjango exactly where GDAL/GEOS are, since on Debian they're not always
-# auto-detected the way they are on Mac/Windows installs
-ENV GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
-ENV GEOS_LIBRARY_PATH=/usr/lib/libgeos_c.so
-
 # Copy only requirements.txt first (not the whole project yet) — this lets Docker
 # cache this layer, so re-builds are much faster if your code changes but
 # dependencies don't
