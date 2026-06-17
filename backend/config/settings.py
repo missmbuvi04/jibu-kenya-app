@@ -33,7 +33,7 @@ if platform.system() == 'Windows':
 # CORE SETTINGS
 # ============================================================================
 
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-build-only-placeholder')
 
 # SECURITY WARNING: debug can't be on in production!
 DEBUG = env.bool('DEBUG', default=False)
