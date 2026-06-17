@@ -260,6 +260,7 @@ REST_FRAMEWORK = {
 # Restrictive CORS - Only allow specific Flutter app domains
 if DEBUG:
     # Development: Allow localhost Flutter dev servers and emulators
+    CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOWED_ORIGINS = [
         'http://localhost:5000',   # Flutter web (default)
         'http://localhost:5001',   # Flutter web (alternate)
