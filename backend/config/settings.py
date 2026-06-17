@@ -72,6 +72,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -109,11 +110,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
+        'NAME': env('DB_NAME', default='placeholder'),
+        'USER': env('DB_USER', default='placeholder'),
+        'PASSWORD': env('DB_PASSWORD', default='placeholder'),
+        'HOST': env('DB_HOST', default='placeholder'),
+        'PORT': env('DB_PORT', default='5432'),
     }
 }
 
@@ -160,6 +161,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -285,6 +288,30 @@ CORS_ALLOW_CREDENTIALS = False
 # LOGGING - Audit & Error Tracking
 # ============================================================================
 
+# In production (DEBUG=False), only log to console — Render captures this
+# automatically and shows it in the dashboard. In local development, also
+# write to a file for convenience.
+_log_handlers = ['console']
+_handlers_config = {
+    'console': {
+        'level': 'DEBUG',
+        'class': 'logging.StreamHandler',
+        'formatter': 'simple',
+    },
+}
+
+if DEBUG:
+    # Only add file logging when running locally
+    _LOGS_DIR = BASE_DIR / 'logs'
+    _LOGS_DIR.mkdir(exist_ok=True)  # create the folder automatically if missing
+    _handlers_config['file'] = {
+        'level': 'INFO',
+        'class': 'logging.FileHandler',
+        'filename': _LOGS_DIR / 'django.log',
+        'formatter': 'verbose',
+    }
+    _log_handlers.append('file')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -298,31 +325,19 @@ LOGGING = {
             'style': '{',
         },
     },
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'formatter': 'verbose',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-    },
+    'handlers': _handlers_config,
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': _log_handlers,
         'level': 'INFO',
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': _log_handlers,
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
         'audit': {
-            'handlers': ['console', 'file'],
+            'handlers': _log_handlers,
             'level': 'INFO',
             'propagate': False,
         },
