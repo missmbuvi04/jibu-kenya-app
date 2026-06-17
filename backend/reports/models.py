@@ -15,6 +15,8 @@ class Report(models.Model):
         ('bridges', 'Bridges'),
         ('streetlights', 'Streetlights'),
         ('public_facilities', 'Public Facilities'),
+        ('safety', 'Safety/crime'),
+        ('other', 'Other'),
     ]
 
     STATUS_CHOICES = [

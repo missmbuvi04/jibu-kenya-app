@@ -29,10 +29,11 @@ def auto_route_report(report):
         report: Report instance to route
     """
     # Determine which department type handles this category
-    if report.category in ['roads', 'water', 'bridges', 'streetlights', 'public_facilities']:
-        dept_type = 'public_works'
-    else:
+    police_categories = ['safety']
+    if report.category in police_categories:
         dept_type = 'police'
+    else:
+        dept_type = 'public_works'
 
     # Find an active department of the correct type in the same county
     department = Department.objects.filter(
@@ -169,8 +170,9 @@ class ReportListCreateView(generics.ListCreateAPIView):
         if user.role == 'citizen':
             # Citizens only see their own submissions
             return Report.objects.filter(citizen=user)
-        elif user.role in ['county_officer', 'admin']:
-            # Officers/admins see all reports in their county
+        elif user.role == 'admin':
+            return Report.objects.all()
+        elif user.role == 'county_officer':
             return Report.objects.filter(county=user.county)
         elif user.role == 'police_officer':
             # Police see only police-type reports in their county
@@ -181,11 +183,11 @@ class ReportListCreateView(generics.ListCreateAPIView):
         return Report.objects.none()
 
     def perform_create(self, serializer):
-        status_update = serializer.save(updated_by=self.request.user)
-        report = status_update.report
-        report.status = status_update.status
-        report.save(update_fields=['status', 'updated_at'])
-        logger.info(f"Report {report.id} status changed to {status_update.status} by {self.request.user.email}")
+        """Save report and trigger auto-routing and duplicate detection."""
+        report = serializer.save(citizen=self.request.user)
+        auto_route_report(report)
+        check_duplicate(report)
+        logger.info(f"New report {report.id} created by {self.request.user.email}")
 
 class ReportDetailView(generics.RetrieveUpdateAPIView):
     """Retrieve and update individual report.
