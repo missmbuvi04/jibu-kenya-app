@@ -25,11 +25,7 @@ class Migration(migrations.Migration):
             name='original_report',
             field=models.ForeignKey(help_text='The original/earlier report', on_delete=django.db.models.deletion.CASCADE, related_name='original_flags', to='reports.report'),
         ),
-        migrations.AlterField(
-            model_name='report',
-            name='location',
-            field=django.contrib.gis.db.models.fields.PointField(blank=True, db_index=True, geography=True, null=True, srid=4326),
-        ),
+        
         migrations.AddIndex(
             model_name='report',
             index=models.Index(fields=['county', 'status'], name='reports_rep_county_3c723b_idx'),
