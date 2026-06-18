@@ -19,6 +19,8 @@ const List<String> _categories = [
   'bridges',
   'streetlights',
   'public_facilities',
+  'safety',
+  'other',
 ];
 
 const List<String> _categoryLabels = [
@@ -27,6 +29,8 @@ const List<String> _categoryLabels = [
   'Bridges',
   'Streetlights',
   'Public Facilities',
+  'Safety / Crime',
+  'Other',
 ];
 
 class SubmitReportScreen extends ConsumerStatefulWidget {
