@@ -16,7 +16,18 @@ import '../../features/reports/presentation/screens/profile_screen.dart';
 import '../../features/reports/presentation/screens/edit_profile_screen.dart';
 import '../../features/reports/data/models/report_model.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
-
+import '../../features/reports/presentation/screens/county_officer_dashboard_screen.dart';
+import '../../../features/reports/presentation/screens/county_officer_dashboard_screen.dart';
+import '../../features/reports/presentation/screens/county_officer_report_detail_screen.dart';
+import '../../features/reports/data/models/report_model.dart';
+import '../../features/reports/presentation/screens/admin_dashboard_screen.dart';
+import '../../features/reports/presentation/screens/admin_user_management_screen.dart';
+import '../../features/reports/presentation/screens/admin_audit_log_screen.dart';
+import '../../features/reports/presentation/screens/police_officer_screen.dart';
+import '../../features/reports/presentation/screens/county_officer_departments_screen.dart';
+import '../../features/reports/presentation/screens/admin_departments_screen.dart';
+import '../../features/reports/presentation/screens/county_officer_map_screen.dart';
+import '../../features/reports/presentation/screens/county_officer_profile_screen.dart';
 class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
@@ -31,6 +42,16 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String notifications = '/notifications';
   static const String editProfile = '/edit-profile';
+  static const String countyOfficerHome = '/officer/reports';
+  static const String countyOfficerReportDetail = '/officer/report-detail';
+  static const String adminHome = '/admin/dashboard';
+  static const String adminUsers = '/admin/users';
+  static const String adminAudit = '/admin/audit';
+  static const String policeOfficerHome = '/police/reports';
+  static const String countyOfficerDepartments = '/officer/departments';
+  static const String adminDepartments = '/admin/departments';
+  static const String countyOfficerMap = '/officer/map';
+  static const String countyOfficerProfile = '/officer/profile';
 }
 
 /// Bridges Riverpod state changes to GoRouter without rebuilding
@@ -73,6 +94,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isLoggedIn &&
           isAuthRoute &&
           state.matchedLocation != AppRoutes.splash) {
+        final user = authState.user;
+        if (user?.isCountyOfficer == true) {
+          return AppRoutes.countyOfficerHome;
+        }
+        if (user?.isAdmin == true) {
+          return AppRoutes.adminHome;
+        }
+        if (user?.isPoliceOfficer == true) {
+          return AppRoutes.policeOfficerHome;
+        }
         return AppRoutes.home;
       }
       return null;
@@ -137,6 +168,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.notifications,
         builder: (context, state) => const NotificationsScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.countyOfficerHome,
+        builder: (context, state) => const CountyOfficerDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.countyOfficerReportDetail,
+        builder: (context, state) {
+          final report = state.extra as ReportModel;
+          return CountyOfficerReportDetailScreen(report: report);
+        },
+      ),
+      GoRoute(path: AppRoutes.adminHome, builder: (context, state) => const AdminDashboardScreen()),
+      GoRoute(path: AppRoutes.adminUsers, builder: (context, state) => const AdminUserManagementScreen()),
+      GoRoute(path: AppRoutes.adminAudit, builder: (context, state) => const AdminAuditLogScreen()),
+      GoRoute(
+        path: AppRoutes.policeOfficerHome,
+        builder: (context, state) => const PoliceOfficerScreen(),
+      ),
+      GoRoute(path: AppRoutes.countyOfficerDepartments, builder: (context, state) => const CountyOfficerDepartmentsScreen()),
+      GoRoute(path: AppRoutes.adminDepartments, builder: (context, state) => const AdminDepartmentsScreen()),
+      GoRoute(path: AppRoutes.countyOfficerMap, builder: (context, state) => const CountyOfficerMapScreen()),
+      GoRoute(path: AppRoutes.countyOfficerProfile, builder: (context, state) => const CountyOfficerProfileScreen()),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(child: Text('Page not found: ${state.error}')),
