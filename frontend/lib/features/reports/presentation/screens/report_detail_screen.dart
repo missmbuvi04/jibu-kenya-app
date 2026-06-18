@@ -372,7 +372,8 @@ class ReportDetailScreen extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Routed to: ${report.county} Roads Department',
+                              '${report.category == 'safety' ? 'Routed to: ${report.county} Police Department' : 'Routed to: ${report.county} Public Works Department'}',
+
                             style: const TextStyle(
                               color: AppColors.teal,
                               fontSize: 12,
