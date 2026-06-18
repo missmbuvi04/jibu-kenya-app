@@ -74,7 +74,13 @@ class HomeScreen extends ConsumerWidget {
                     Row(
                       children: [
                         GestureDetector(
-                          onTap: () => context.push(AppRoutes.notifications),
+                          onTap: () async {
+                            await context.push(AppRoutes.notifications);
+                            // Officer-side status changes may have happened
+                            // while we were on the notifications screen —
+                            // refresh so Home reflects them immediately.
+                            ref.read(reportsProvider.notifier).refresh();
+                          },
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
@@ -324,18 +330,19 @@ class HomeScreen extends ConsumerWidget {
             label: 'Profile',
           ),
         ],
-        onDestinationSelected: (index) {
+        onDestinationSelected: (index) async {
           switch (index) {
             case 1:
-              context.push(AppRoutes.map);
+              await context.push(AppRoutes.map);
               break;
             case 2:
-              context.push(AppRoutes.allReports);
+              await context.push(AppRoutes.allReports);
               break;
             case 3:
-              context.push(AppRoutes.profile);
+              await context.push(AppRoutes.profile);
               break;
           }
+          ref.read(reportsProvider.notifier).refresh();
         },
       ),
     );
