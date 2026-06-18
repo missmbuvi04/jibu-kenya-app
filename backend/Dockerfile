@@ -38,4 +38,4 @@ RUN python manage.py collectstatic --noinput
 
 # Render sets the PORT environment variable dynamically; gunicorn must bind to it.
 # config.wsgi:application points to backend/config/wsgi.py's "application" object.
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+CMD python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
