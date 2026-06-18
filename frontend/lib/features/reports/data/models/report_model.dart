@@ -97,6 +97,10 @@ class ReportModel {
         return 'Streetlights';
       case 'public_facilities':
         return 'Facilities';
+      case 'safety':
+        return 'Safety / Crime';
+      case 'other':
+        return 'Other';
       default:
         return category;
     }
