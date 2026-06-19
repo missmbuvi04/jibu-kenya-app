@@ -18,6 +18,7 @@ class CountyOfficerDashboardScreen extends ConsumerStatefulWidget {
 
 class _CountyOfficerDashboardScreenState extends ConsumerState<CountyOfficerDashboardScreen> {
   String _filter = 'all';
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +41,12 @@ class _CountyOfficerDashboardScreenState extends ConsumerState<CountyOfficerDash
           final pending = reports.where((r) => r.status == 'submitted').length;
           final inProgress = reports.where((r) => r.status == 'in_progress').length;
           final resolved = reports.where((r) => r.status == 'resolved').length;
-          final filtered = _filter == 'all' ? reports : reports.where((r) => r.status == _filter).toList();
+          final statusFiltered = _filter == 'all' ? reports : reports.where((r) => r.status == _filter).toList();
+final filtered = _searchQuery.isEmpty ? statusFiltered : statusFiltered.where((r) =>
+  r.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+  r.categoryLabel.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+  r.county.toLowerCase().contains(_searchQuery.toLowerCase())
+).toList();
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,9 +70,31 @@ class _CountyOfficerDashboardScreenState extends ConsumerState<CountyOfficerDash
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Incoming Reports',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
-                    const SizedBox(height: 14),
+                    Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    const Text('Incoming Reports',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
+    SizedBox(
+      width: 260,
+      height: 38,
+      child: TextField(
+        onChanged: (val) => setState(() => _searchQuery = val),
+        decoration: InputDecoration(
+          hintText: 'Search reports...',
+          hintStyle: const TextStyle(fontSize: 13, color: AppColors.grey),
+          prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.grey),
+          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.lightBg)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.lightBg)),
+          filled: true,
+          fillColor: AppColors.lightBg,
+        ),
+      ),
+    ),
+  ],
+),
+const SizedBox(height: 14),
                     Row(
                       children: ['all', 'submitted', 'assigned', 'in_progress', 'resolved']
                           .map((s) => Padding(
