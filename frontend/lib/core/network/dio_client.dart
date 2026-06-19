@@ -69,6 +69,14 @@ class DioClient {
     }
   }
 
+  Future<Response> delete(String path, {dynamic data}) async {
+    try {
+      return await _dio.delete(path, data: data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Future<Response> postFormData(
     String path, {
     required FormData formData,
