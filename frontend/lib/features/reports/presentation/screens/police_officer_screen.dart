@@ -123,8 +123,17 @@ class _PoliceOfficerScreenState extends ConsumerState<PoliceOfficerScreen> {
                                         ? null
                                         : notesController.text.trim(),
                                   );
-                              // Close the sheet once the update call finishes.
-                              if (sheetContext.mounted) Navigator.pop(sheetContext);
+                              ref.invalidate(reportsProvider);
+                              if (sheetContext.mounted) {
+                                Navigator.pop(sheetContext);
+                                ScaffoldMessenger.of(sheetContext).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Status updated successfully'),
+                                    backgroundColor: AppColors.green,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
                             },
                       child: actionState.isLoading
                           ? const SizedBox(
@@ -277,11 +286,16 @@ class _PoliceOfficerScreenState extends ConsumerState<PoliceOfficerScreen> {
                   children: [
                     const Icon(Icons.wifi_off_outlined, size: 48, color: AppColors.grey),
                     const SizedBox(height: 12),
-                    const Text('Could not load reports', style: TextStyle(color: AppColors.grey)),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
+                    const Text('Could not load reports',
+                        style: TextStyle(color: AppColors.dark, fontSize: 15, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 6),
+                    const Text('Check your internet connection and try again.',
+                        style: TextStyle(color: AppColors.grey, fontSize: 13)),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
                       onPressed: () => ref.read(reportsProvider.notifier).refresh(),
-                      child: const Text('Retry'),
+                      icon: const Icon(Icons.refresh, size: 16),
+                      label: const Text('Retry'),
                     ),
                   ],
                 ),
