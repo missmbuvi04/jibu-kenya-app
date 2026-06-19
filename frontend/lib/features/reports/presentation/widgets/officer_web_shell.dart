@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../features/auth/domain/auth_provider.dart';
+import '../../../../features/notifications/domain/notifications_provider.dart';
 
 class OfficerNavItem {
   final IconData icon;
@@ -171,15 +172,122 @@ class OfficerWebShell extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.grey.withOpacity(0.25)),
+                          GestureDetector(
+                            onTap: () {
+                              final notifications = ref.read(notificationsProvider).value ?? [];
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => Dialog(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                  child: SizedBox(
+                                    width: 360,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text('Notifications',
+                                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
+                                              IconButton(
+                                                icon: const Icon(Icons.close, size: 18),
+                                                onPressed: () => Navigator.pop(ctx),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Divider(height: 1),
+                                        notifications.isEmpty
+                                            ? const Padding(
+                                                padding: EdgeInsets.all(24),
+                                                child: Center(
+                                                  child: Text('No notifications yet',
+                                                      style: TextStyle(color: AppColors.grey, fontSize: 13)),
+                                                ),
+                                              )
+                                            : ConstrainedBox(
+                                                constraints: const BoxConstraints(maxHeight: 360),
+                                                child: ListView.separated(
+                                                  shrinkWrap: true,
+                                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                                  itemCount: notifications.length,
+                                                  separatorBuilder: (_, __) => const Divider(height: 1),
+                                                  itemBuilder: (_, i) {
+                                                    final n = notifications[i];
+                                                    return ListTile(
+                                                      leading: Container(
+                                                        width: 8,
+                                                        height: 8,
+                                                        decoration: BoxDecoration(
+                                                          shape: BoxShape.circle,
+                                                          color: n.isRead ? AppColors.grey : AppColors.teal,
+                                                        ),
+                                                      ),
+                                                      title: Text(n.body,
+                                                          style: TextStyle(
+                                                              fontSize: 13,
+                                                              color: AppColors.dark,
+                                                              fontWeight: n.isRead ? FontWeight.normal : FontWeight.w600)),
+                                                      subtitle: Text(n.relativeTime,
+                                                          style: const TextStyle(fontSize: 11, color: AppColors.grey)),
+                                                      onTap: () {
+                                                        ref.read(notificationsProvider.notifier).markAsRead(n.id);
+                                                        Navigator.pop(ctx);
+                                                      },
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.grey.withOpacity(0.25)),
+                                  ),
+                                  child: const Icon(Icons.notifications_outlined, size: 18, color: AppColors.grey),
+                                ),
+                                Consumer(
+                                  builder: (context, ref, _) {
+                                    final unread = ref.watch(notificationsProvider).value
+                                            ?.where((n) => !n.isRead)
+                                            .length ?? 0;
+                                    if (unread == 0) return const SizedBox.shrink();
+                                    return Positioned(
+                                      right: -2,
+                                      top: -2,
+                                      child: Container(
+                                        width: 16,
+                                        height: 16,
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            unread > 9 ? '9+' : '$unread',
+                                            style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
-                            child: const Icon(Icons.notifications_outlined, size: 18, color: AppColors.grey),
                           ),
                           const SizedBox(width: 12),
                           Container(
