@@ -8,8 +8,10 @@ import '../widgets/status_badge.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/app_router.dart';
 
-class AdminDashboardScreen extends ConsumerWidget {
+class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  
 
   static const navItems = [
     OfficerNavItem(icon: Icons.dashboard_outlined, label: 'Dashboard', route: AppRoutes.adminHome),
@@ -19,7 +21,16 @@ class AdminDashboardScreen extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
+  String _searchQuery = '';
+
+  
+
+  @override
+  Widget build(BuildContext context) {
     final reportsAsync = ref.watch(reportsProvider);
     final usersAsync = ref.watch(usersProvider);
     final deptsAsync = ref.watch(departmentsProvider);
@@ -31,7 +42,7 @@ class AdminDashboardScreen extends ConsumerWidget {
       pageSubtitle: 'System overview — All 47 Counties',
       selectedIndex: 0,
       roleBadge: 'AD',
-      navItems: navItems,
+      navItems: AdminDashboardScreen.navItems,
       child: reportsAsync.when(
         data: (reports) {
           final resolvedToday = reports.where((r) {
@@ -71,10 +82,32 @@ class AdminDashboardScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Recent Reports — All Counties',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
-                    const SizedBox(height: 14),
-                    Table(
+                    Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Recent Reports — All Counties',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
+                  SizedBox(
+                    width: 260,
+                    height: 38,
+                    child: TextField(
+                      onChanged: (val) => setState(() => _searchQuery = val),
+                      decoration: InputDecoration(
+                        hintText: 'Search reports...',
+                        hintStyle: const TextStyle(fontSize: 13, color: AppColors.grey),
+                        prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.grey),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.lightBg)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.lightBg)),
+                        filled: true,
+                        fillColor: AppColors.lightBg,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Table(
                       columnWidths: const {
                         0: FixedColumnWidth(120), 1: FixedColumnWidth(100), 2: FixedColumnWidth(100),
                         3: FixedColumnWidth(110), 4: FlexColumnWidth(1), 5: FixedColumnWidth(90),
@@ -84,7 +117,11 @@ class AdminDashboardScreen extends ConsumerWidget {
                           _Header('Reference'), _Header('County'), _Header('Category'),
                           _Header('Status'), _Header('Department'), _Header('Date'),
                         ]),
-                        ...reports.take(10).map((r) => TableRow(children: [
+                        ...(_searchQuery.isEmpty ? reports : reports.where((r) =>
+                      r.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                      r.categoryLabel.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                      r.county.toLowerCase().contains(_searchQuery.toLowerCase())
+                    ).toList()).take(10).map((r) => TableRow(children: [
                               _Cell(r.referenceNumber),
                               _Cell(r.county),
                               _Cell(r.categoryLabel),
