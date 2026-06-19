@@ -189,6 +189,7 @@ class _CountyOfficerReportDetailScreenState extends ConsumerState<CountyOfficerR
                                     status: _selectedStatus,
                                     notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
                                   );
+                              ref.invalidate(reportsProvider);
                               if (context.mounted) context.pop();
                             },
                       child: actionState.isLoading

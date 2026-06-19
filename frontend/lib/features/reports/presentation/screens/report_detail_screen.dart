@@ -7,6 +7,8 @@ import '../widgets/status_badge.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../domain/reports_provider.dart';
+
 
 class ReportDetailScreen extends ConsumerWidget {
   final int reportId;
@@ -84,7 +86,18 @@ class ReportDetailScreen extends ConsumerWidget {
   }
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final report = preloadedReport;
+    final reportsAsync = ref.watch(reportsProvider);
+    final report = reportsAsync.when(
+      data: (reports) {
+        try {
+          return reports.firstWhere((r) => r.id == reportId);
+        } catch (_) {
+          return preloadedReport;
+        }
+      },
+      loading: () => preloadedReport,
+      error: (_, __) => preloadedReport,
+    );
 
     if (report == null) {
       return Scaffold(
