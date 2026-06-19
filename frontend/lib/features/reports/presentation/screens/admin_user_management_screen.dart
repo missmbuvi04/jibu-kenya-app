@@ -15,6 +15,7 @@ class AdminUserManagementScreen extends ConsumerStatefulWidget {
 
 class _AdminUserManagementScreenState extends ConsumerState<AdminUserManagementScreen> {
   String _roleFilter = 'all';
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +29,12 @@ class _AdminUserManagementScreenState extends ConsumerState<AdminUserManagementS
       navItems: AdminDashboardScreen.navItems,
       child: usersAsync.when(
         data: (users) {
-          final filtered = _roleFilter == 'all' ? users : users.where((u) => u.role == _roleFilter).toList();
+          final roleFiltered = _roleFilter == 'all' ? users : users.where((u) => u.role == _roleFilter).toList();
+          final filtered = _searchQuery.isEmpty ? roleFiltered : roleFiltered.where((u) =>
+            u.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            u.email.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            u.county.toLowerCase().contains(_searchQuery.toLowerCase())
+          ).toList();
           return Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -37,7 +43,13 @@ class _AdminUserManagementScreenState extends ConsumerState<AdminUserManagementS
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: ['all', 'citizen', 'county_officer', 'police_officer', 'admin'].map((r) {
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: ['all', 'citizen', 'county_officer', 'police_officer', 'admin'].map((r) {
                     final label = {
                       'all': 'All Users', 'citizen': 'Citizens', 'county_officer': 'County Officers',
                       'police_officer': 'Police Officers', 'admin': 'Admins',
@@ -58,6 +70,28 @@ class _AdminUserManagementScreenState extends ConsumerState<AdminUserManagementS
                       ),
                     );
                   }).toList(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 220,
+                      height: 38,
+                      child: TextField(
+                        onChanged: (val) => setState(() => _searchQuery = val),
+                        decoration: InputDecoration(
+                          hintText: 'Search users...',
+                          hintStyle: const TextStyle(fontSize: 13, color: AppColors.grey),
+                          prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.grey),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.lightBg)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppColors.lightBg)),
+                          filled: true,
+                          fillColor: AppColors.lightBg,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 Table(
