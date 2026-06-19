@@ -122,3 +122,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'name', 'email', 'role', 'county', 'is_active', 'created_at']
         read_only_fields = ['id', 'created_at', 'email', 'role']  # Email/role shouldn't change
+
+
+class AdminUserUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for admin updating other users — allows role editing."""
+    class Meta:
+        model = User
+        fields = ['name', 'role', 'county', 'is_active']

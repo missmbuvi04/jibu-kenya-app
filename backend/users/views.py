@@ -3,7 +3,7 @@ import logging
 from rest_framework import generics, permissions, status
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import RegisterSerializer, UserSerializer, AdminUserUpdateSerializer
 from .permissions import IsAdmin
 
 logger = logging.getLogger(__name__)
@@ -93,3 +93,14 @@ class LoginView(TokenObtainPairView):
         except Exception as e:
             logger.warning(f"Failed login attempt: {email} - {str(e)}")
             raise
+
+class UserAdminDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Admin-only: view, update or delete a specific user.
+    
+    GET /api/users/<id>/: View user details
+    PATCH /api/users/<id>/: Update name, role, county, is_active
+    DELETE /api/users/<id>/: Delete user account
+    """
+    serializer_class = AdminUserUpdateSerializer
+    permission_classes = [IsAdmin]
+    queryset = User.objects.all()        
