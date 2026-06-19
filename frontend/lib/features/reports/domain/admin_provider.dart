@@ -18,3 +18,97 @@ final auditLogsProvider = FutureProvider<List<AuditLogModel>>((ref) {
 final duplicatesCountProvider = FutureProvider<int>((ref) {
   return ref.read(adminRepositoryProvider).getDuplicatesCount();
 });
+
+// ── Admin CRUD Action Provider ───────────────────────────────────────────
+class AdminActionNotifier extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> createUser({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+    required String county,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(adminRepositoryProvider).createUser({
+        'name': name,
+        'email': email,
+        'password': password,
+        'password_confirm': password,
+        'role': role,
+        'county': county,
+      });
+      ref.invalidate(usersProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> updateUser(int id, Map<String, dynamic> data) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(adminRepositoryProvider).updateUser(id, data);
+      ref.invalidate(usersProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteUser(int id) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(adminRepositoryProvider).deleteUser(id);
+      ref.invalidate(usersProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> createDepartment(Map<String, dynamic> data) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(adminRepositoryProvider).createDepartment(data);
+      ref.invalidate(departmentsProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> updateDepartment(int id, Map<String, dynamic> data) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(adminRepositoryProvider).updateDepartment(id, data);
+      ref.invalidate(departmentsProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteDepartment(int id) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(adminRepositoryProvider).deleteDepartment(id);
+      ref.invalidate(departmentsProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+}
+
+final adminActionProvider =
+    AsyncNotifierProvider<AdminActionNotifier, void>(AdminActionNotifier.new);
