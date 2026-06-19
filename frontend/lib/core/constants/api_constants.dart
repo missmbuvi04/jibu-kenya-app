@@ -34,6 +34,7 @@ class ApiConstants {
   // Departments
   static const String departments = '/api/departments/';
   static String departmentDetail(int id) => '/api/departments/$id/';
+  static String userDetail(int id) => '/api/users/$id/';
 
   // Audit
   static const String audit = '/api/audit/';
