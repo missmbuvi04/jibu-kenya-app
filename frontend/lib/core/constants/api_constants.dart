@@ -7,8 +7,8 @@ class ApiConstants {
   // Find it by running `ipconfig` on Windows — look for IPv4 Address
   // Example: 192.168.1.105
   static String get baseUrl {
-  if (kIsWeb) return 'http://127.0.0.1:8000';
   if (kReleaseMode) return 'https://jibu-kenya-app.onrender.com';
+  if (kIsWeb) return 'http://127.0.0.1:8000';
   return 'http://192.168.1.88:8000';
 }
 
