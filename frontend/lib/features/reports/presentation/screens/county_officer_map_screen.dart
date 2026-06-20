@@ -34,16 +34,14 @@ class _CountyOfficerMapScreenState extends ConsumerState<CountyOfficerMapScreen>
     }
   }
 
-  double _latToY(double lat, double canvasHeight) {
-    const minLat = -1.45;
-    const maxLat = -1.15;
+  double _latToY(double lat, double canvasHeight, double minLat, double maxLat) {
+    if (maxLat == minLat) return canvasHeight / 2;
     final normalized = (lat - minLat) / (maxLat - minLat);
     return canvasHeight * (1 - normalized);
   }
 
-  double _lngToX(double lng, double canvasWidth) {
-    const minLng = 36.65;
-    const maxLng = 37.10;
+  double _lngToX(double lng, double canvasWidth, double minLng, double maxLng) {
+    if (maxLng == minLng) return canvasWidth / 2;
     final normalized = (lng - minLng) / (maxLng - minLng);
     return canvasWidth * normalized;
   }
@@ -73,7 +71,13 @@ class _CountyOfficerMapScreenState extends ConsumerState<CountyOfficerMapScreen>
                   builder: (context, constraints) {
                     final w = constraints.maxWidth;
                     final h = constraints.maxHeight;
-                    return Container(
+                    final lats = geoReports.map((r) => r.latitude!).toList();
+                    final lngs = geoReports.map((r) => r.longitude!).toList();
+                    final minLat = geoReports.isEmpty ? -1.45 : lats.reduce((a, b) => a < b ? a : b) - 0.01;
+                    final maxLat = geoReports.isEmpty ? -1.15 : lats.reduce((a, b) => a > b ? a : b) + 0.01;
+                    final minLng = geoReports.isEmpty ? 36.65 : lngs.reduce((a, b) => a < b ? a : b) - 0.01;
+                    final maxLng = geoReports.isEmpty ? 37.10 : lngs.reduce((a, b) => a > b ? a : b) + 0.01;
+                    return Container(       // ← return comes AFTER all the finals
                       width: w,
                       height: h,
                       decoration: BoxDecoration(color: const Color(0xFFE8F0D8), borderRadius: BorderRadius.circular(14)),
@@ -94,8 +98,8 @@ class _CountyOfficerMapScreenState extends ConsumerState<CountyOfficerMapScreen>
                                 ),
                               ),
                             ...geoReports.map((report) {
-                              final x = _lngToX(report.longitude!, w);
-                              final y = _latToY(report.latitude!, h);
+                              final x = _lngToX(report.longitude!, w, minLng, maxLng);
+                              final y = _latToY(report.latitude!, h, minLat, maxLat);
                               final isSelected = _selectedReport?.id == report.id;
                               return Positioned(
                                 left: x - 16,
