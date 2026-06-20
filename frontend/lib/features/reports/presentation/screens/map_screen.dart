@@ -34,19 +34,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   // Convert real lat/lng to canvas position
   // Nairobi bounding box: lat -1.45 to -1.15, lng 36.65 to 37.10
-  double _latToY(double lat, double canvasHeight) {
-    const minLat = -1.45;
-    const maxLat = -1.15;
-    final normalized = (lat - minLat) / (maxLat - minLat);
-    return canvasHeight * (1 - normalized);
-  }
+ double _latToY(double lat, double canvasHeight, double minLat, double maxLat) {
+  if (maxLat == minLat) return canvasHeight / 2;
+  final normalized = (lat - minLat) / (maxLat - minLat);
+  return canvasHeight * (1 - normalized);
+}
 
-  double _lngToX(double lng, double canvasWidth) {
-    const minLng = 36.65;
-    const maxLng = 37.10;
-    final normalized = (lng - minLng) / (maxLng - minLng);
-    return canvasWidth * normalized;
-  }
+double _lngToX(double lng, double canvasWidth, double minLng, double maxLng) {
+  if (maxLng == minLng) return canvasWidth / 2;
+  final normalized = (lng - minLng) / (maxLng - minLng);
+  return canvasWidth * normalized;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +114,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       builder: (context, constraints) {
                         final w = constraints.maxWidth;
                         final h = constraints.maxHeight;
+                        final lats = geoReports.map((r) => r.latitude!).toList();
+                        final lngs = geoReports.map((r) => r.longitude!).toList();
+                        final minLat = geoReports.isEmpty ? -1.45 : lats.reduce((a, b) => a < b ? a : b) - 0.01;
+                        final maxLat = geoReports.isEmpty ? -1.15 : lats.reduce((a, b) => a > b ? a : b) + 0.01;
+                        final minLng = geoReports.isEmpty ? 36.65 : lngs.reduce((a, b) => a < b ? a : b) - 0.01;
+                        final maxLng = geoReports.isEmpty ? 37.10 : lngs.reduce((a, b) => a > b ? a : b) + 0.01;
 
                         return Container(
                           width: w,
@@ -164,8 +168,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
                                 // Live report pins
                                 ...geoReports.map((report) {
-                                  final x = _lngToX(report.longitude!, w);
-                                  final y = _latToY(report.latitude!, h - 200);
+                                  final x = _lngToX(report.longitude!, w, minLng, maxLng);
+                                  final y = _latToY(report.latitude!, h, minLat, maxLat);
+                                  
                                   final isSelected =
                                       _selectedReport?.id == report.id;
 
