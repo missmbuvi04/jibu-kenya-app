@@ -193,6 +193,25 @@ Base URL (production): `https://jibu-kenya-app.onrender.com`
 
 ## Project Structure
 
+```
+jibu-kenya-app/
+├── backend/                    # Django REST API
+│   ├── config/                 # Settings, URLs, WSGI, Dockerfile
+│   ├── users/                  # Auth, registration, role management
+│   │   └── tests.py            # Unit + integration tests
+│   ├── reports/                # Report model, routing, duplicate detection
+│   │   └── tests.py            # Unit + integration tests
+│   ├── departments/            # County department management
+│   ├── notifications/          # User notifications on status changes
+│   └── audit/                  # Immutable audit log
+│
+└── frontend/                   # Flutter cross-platform app
+    └── lib/
+        ├── core/               # Constants, routing, network, storage
+        └── features/
+            ├── auth/           # Login, registration, JWT management
+            └── reports/        # All four role screens and providers
+```
 ---
 
 ## Deployment
@@ -210,14 +229,48 @@ Base URL (production): `https://jibu-kenya-app.onrender.com`
 ---
 
 ## Test Accounts (Production)
-
 The following accounts exist on the live Render deployment for testing purposes:
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | *(set via Django admin)* | *(set via Django admin)* |
-| County Officer | *(create via Admin panel)* | *(set on creation)* |
+| County Officer | co1@jibutest.com | Testing1234! |
+| County Officer | co2@jibutest.com | Testing1234! |
+| County Officer | co3@jibutest.com | Testing1234! |
+| Police Officer | po1@jibutest.com | Testing1234! |
+| Police Officer | po2@jibutest.com | Testing1234! |
+| Admin | admin1@jibutest.com | Testing1234! |
+| Admin | admin2@jibutest.com | Testing1234! |
 | Citizen | Register directly in the app | — |
+
+## Testing
+
+### Automated Tests — 12 tests across two strategies
+
+```bash
+cd backend
+python manage.py test users.tests reports.tests --verbosity=2
+```
+
+**Unit Tests (7):**
+- Registration rejects duplicate emails and weak passwords
+- Login returns JWT tokens with valid credentials
+- Wrong password returns HTTP 401
+- Unauthenticated requests to protected endpoints are blocked
+- Safety reports route automatically to police departments
+- Road reports route automatically to public works departments
+
+**Integration Tests (5):**
+- Admin can access user list; citizen is forbidden
+- Citizen can submit a report end to end
+- Officer cannot submit reports (citizen role only)
+- Citizens only see their own reports
+- Officer can update report status; citizen cannot
+
+### Usability Testing
+- 10–15 participants across all four roles
+- System Usability Scale (SUS) questionnaire — target score ≥ 71
+- Task performance protocol with timed task completion measurement
+- Post-session open-ended feedback
 
 ---
 
