@@ -3,6 +3,7 @@
 > **Jibu** means *answer* or *respond* in Swahili. Built to close the gap between what Kenyan citizens can see and what their county governments can act on.
 
 **Live Backend:** https://jibu-kenya-app.onrender.com  
+**Web App (Flutter Web):** https://peppy-pixie-a143d0.netlify.app  
 **GitHub Repository:** https://github.com/missmbuvi04/jibu-kenya-app  
 **Demo Video:** https://screenrec.com/share/2qK7e9IAQt  
 **Figma Designs:** https://www.figma.com/design/JOWjkSm2DO8CzWJSqt7E8d/Jibu-Kenya-UI-Design
