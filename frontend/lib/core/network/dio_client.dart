@@ -97,16 +97,25 @@ class DioClient {
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
       return Exception(
-        'Connection timed out. Make sure your backend is running and your IP address is correct.',
+        'The server is taking too long to respond. Please check your internet connection and try again.',
       );
     }
     if (e.type == DioExceptionType.connectionError) {
       return Exception(
-        'Cannot reach the server. Check that:\n'
-        '1. Django is running (python manage.py runserver 0.0.0.0:8000)\n'
-        '2. Your phone and laptop are on the same Wi-Fi\n'
-        '3. The IP address in api_constants.dart is correct',
+        'Unable to connect to the server. Please check your internet connection and try again.',
       );
+    }
+    if (e.response?.statusCode == 401) {
+      return Exception('Your session has expired. Please log in again.');
+    }
+    if (e.response?.statusCode == 403) {
+      return Exception('You do not have permission to perform this action.');
+    }
+    if (e.response?.statusCode == 404) {
+      return Exception('The requested information could not be found.');
+    }
+    if (e.response?.statusCode == 500) {
+      return Exception('Something went wrong on our end. Please try again in a moment.');
     }
     return Exception(parseDjangoError(e));
   }
