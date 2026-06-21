@@ -201,19 +201,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Role badge
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.tealLight,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        'Signing up as a Citizen',
-                        style: TextStyle(color: AppColors.grey, fontSize: 12),
-                      ),
-                    ),
+                   
                     const SizedBox(height: 24),
 
                     // Create account button

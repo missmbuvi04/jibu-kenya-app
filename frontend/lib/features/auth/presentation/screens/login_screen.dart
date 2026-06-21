@@ -236,21 +236,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Role hint
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.tealLight,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        'Signing in as Citizen',
-                        style: TextStyle(
-                            color: AppColors.teal, fontSize: 13),
-                      ),
-                    ),
                   ],
                 ),
               ),
