@@ -234,11 +234,11 @@ The following accounts exist on the live Render deployment for testing purposes:
 
 | Role | Email | Password |
 |---|---|---|
-| County Officer | co1@jibutest.com | Testing1234! |
-| County Officer | co2@jibutest.com | Testing1234! |
-| County Officer | co3@jibutest.com | Testing1234! |
-| Police Officer | po1@jibutest.com | Testing1234! |
-| Police Officer | po2@jibutest.com | Testing1234! |
+| County Officer | c01@jibutest.com | Testing1234! |
+| County Officer | c02@jibutest.com | Testing1234! |
+| County Officer | c03@jibutest.com | Testing1234! |
+| Police Officer | p01@jibutest.com | Testing1234! |
+| Police Officer | p02@jibutest.com | Testing1234! |
 | Admin | admin1@jibutest.com | Testing1234! |
 | Admin | admin2@jibutest.com | Testing1234! |
 | Citizen | Register directly in the app | — |
