@@ -176,7 +176,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 USE_CLOUDINARY = env.bool('USE_CLOUDINARY', default=False)
 
 if USE_CLOUDINARY:
-    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
+    for app in ['cloudinary_storage', 'cloudinary']:
+        if app not in INSTALLED_APPS:
+            INSTALLED_APPS.append(app)
     CLOUDINARY_STORAGE = {
         'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
         'API_KEY': env('CLOUDINARY_API_KEY'),
