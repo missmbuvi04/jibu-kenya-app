@@ -176,6 +176,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # ============================================================================
 
 USE_CLOUDINARY = os.environ.get('USE_CLOUDINARY', '').lower() in ('true', '1', 'yes')
+print(f"DEBUG USE_CLOUDINARY={USE_CLOUDINARY}, raw={os.environ.get('USE_CLOUDINARY', 'NOT SET')}")
 
 if USE_CLOUDINARY:
     for app in ['cloudinary_storage', 'cloudinary']:
