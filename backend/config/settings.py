@@ -175,7 +175,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # CLOUDINARY — Object Storage for incident photos
 # ============================================================================
 
-USE_CLOUDINARY = env.bool('USE_CLOUDINARY', default=False)
+USE_CLOUDINARY = os.environ.get('USE_CLOUDINARY', '').lower() in ('true', '1', 'yes')
 
 if USE_CLOUDINARY:
     for app in ['cloudinary_storage', 'cloudinary']:
