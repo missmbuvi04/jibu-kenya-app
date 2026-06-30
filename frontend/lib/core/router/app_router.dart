@@ -28,6 +28,7 @@ import '../../features/reports/presentation/screens/county_officer_departments_s
 import '../../features/reports/presentation/screens/admin_departments_screen.dart';
 import '../../features/reports/presentation/screens/county_officer_map_screen.dart';
 import '../../features/reports/presentation/screens/county_officer_profile_screen.dart';
+import '../../features/reports/presentation/screens/admin_analytics_screen.dart';
 class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
@@ -47,6 +48,7 @@ class AppRoutes {
   static const String adminHome = '/admin/dashboard';
   static const String adminUsers = '/admin/users';
   static const String adminAudit = '/admin/audit';
+  static const String adminAnalytics = '/admin/analytics';
   static const String policeOfficerHome = '/police/reports';
   static const String countyOfficerDepartments = '/officer/departments';
   static const String adminDepartments = '/admin/departments';
@@ -190,6 +192,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.adminDepartments, builder: (context, state) => const AdminDepartmentsScreen()),
       GoRoute(path: AppRoutes.countyOfficerMap, builder: (context, state) => const CountyOfficerMapScreen()),
       GoRoute(path: AppRoutes.countyOfficerProfile, builder: (context, state) => const CountyOfficerProfileScreen()),
+      GoRoute(
+              path: AppRoutes.adminAnalytics,
+              builder: (context, state) => const AdminAnalyticsScreen(),
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(child: Text('Page not found: ${state.error}')),
