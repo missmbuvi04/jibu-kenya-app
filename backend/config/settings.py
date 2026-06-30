@@ -39,7 +39,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-build-only-placeholder')
 DEBUG = env.bool('DEBUG', default=False)
 
 # Allowed hosts - MUST be configured for production security
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', ' 172.30.21.81', 'jibu-kenya-app.onrender.com'])
 
 
 # ============================================================================
@@ -61,7 +61,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
-    
+    'cloudinary_storage',
+    'cloudinary',
+
     # Local apps
     'users',
     'reports',
@@ -167,6 +169,21 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# ============================================================================
+# CLOUDINARY — Object Storage for incident photos
+# ============================================================================
+
+USE_CLOUDINARY = env.bool('USE_CLOUDINARY', default=False)
+
+if USE_CLOUDINARY:
+    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
+        'API_KEY': env('CLOUDINARY_API_KEY'),
+        'API_SECRET': env('CLOUDINARY_API_SECRET'),
+    }
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 AUTH_USER_MODEL = 'users.User'
 
 
@@ -215,6 +232,30 @@ CSRF_COOKIE_AGE = 31449600  # 1 year
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5 MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5 MB
 
+# ============================================================================
+# REDIS CACHE - Performance optimization for reports and departments
+# ============================================================================
+
+REDIS_URL = env('REDIS_URL', default='')
+
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            },
+            'TIMEOUT': 300,  # 5 minutes default
+        }
+    }
+else:
+    # Fallback to local memory cache if Redis isn't configured (local dev without Redis)
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
 
 # ============================================================================
 # JWT AUTHENTICATION - Security Hardened
