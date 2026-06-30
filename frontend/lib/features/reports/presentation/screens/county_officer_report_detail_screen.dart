@@ -185,12 +185,23 @@ class _CountyOfficerReportDetailScreenState extends ConsumerState<CountyOfficerR
                           ? null
                           : () async {
                               await ref.read(officerActionProvider.notifier).updateStatus(
-                                    reportId: report.id,
-                                    status: _selectedStatus,
-                                    notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-                                  );
-                              ref.invalidate(reportsProvider);
-                              if (context.mounted) context.pop();
+                                reportId: report.id,
+                                status: _selectedStatus,
+                                notes: _notesController.text.trim().isEmpty
+                                    ? null
+                                    : _notesController.text.trim(),
+                              );
+                              await ref.read(reportsProvider.notifier).refresh();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Status updated successfully'),
+                                    backgroundColor: AppColors.green,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                                context.pop();
+                              }
                             },
                       child: actionState.isLoading
                           ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2))

@@ -167,8 +167,12 @@ class ReportDetailScreen extends ConsumerWidget {
           ),
 
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+            child: RefreshIndicator(
+                color: AppColors.teal,
+                onRefresh: () => ref.read(reportsProvider.notifier).refresh(),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+              
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -411,6 +415,7 @@ class ReportDetailScreen extends ConsumerWidget {
                 ],
               ),
             ),
+          ),
           ),
         ],
       ),
