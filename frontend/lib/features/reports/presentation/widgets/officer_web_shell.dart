@@ -154,24 +154,7 @@ class OfficerWebShell extends ConsumerWidget {
                       ),
                       Row(
                         children: [
-                          Container(
-                            width: 220,
-                            height: 38,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.grey.withOpacity(0.25)),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.search, size: 16, color: AppColors.grey),
-                                SizedBox(width: 8),
-                                Text('Search...', style: TextStyle(color: AppColors.grey, fontSize: 13)),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
+                         
                           GestureDetector(
                             onTap: () {
                               final notifications = ref.read(notificationsProvider).value ?? [];
