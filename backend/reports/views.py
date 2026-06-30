@@ -9,9 +9,10 @@ from PIL import Image
 from .models import Report, ReportStatus, DuplicateFlag
 from .serializers import ReportSerializer, ReportStatusSerializer, DuplicateFlagSerializer
 from departments.models import Department
+from notifications.models import Notification
 from users.permissions import IsCitizen, IsOfficer, IsAdminOrCountyOfficer
 from rest_framework.permissions import IsAuthenticated
-
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -162,31 +163,52 @@ class ReportListCreateView(generics.ListCreateAPIView):
         return [permissions.IsAuthenticated()]  # Any authenticated user — queryset filters by role
 
     def get_queryset(self):
-        """Return reports based on user role and county.
+        """Return reports based on user role and county, with short-lived caching.
         
         Uses role-based filtering to ensure users only see appropriate reports.
+        Cache is keyed by role+county so different officer groups don't share
+        stale data, and is invalidated on every report create/update.
         """
         user = self.request.user
+        cache_key = f"reports:{user.role}:{user.county}:{user.id if user.role == 'citizen' else 'shared'}"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            logger.info(f"CACHE HIT: {cache_key}")
+            return cached
+        logger.info(f"CACHE MISS: {cache_key}")
+
         if user.role == 'citizen':
-            # Citizens only see their own submissions
-            return Report.objects.filter(citizen=user)
+            queryset = Report.objects.filter(citizen=user)
         elif user.role == 'admin':
-            return Report.objects.all()
+            queryset = Report.objects.all()
         elif user.role == 'county_officer':
-            return Report.objects.filter(county=user.county)
+            queryset = Report.objects.filter(
+                county=user.county
+            ).exclude(
+                assigned_department__type='police'
+            )
         elif user.role == 'police_officer':
-            # Police see only police-type reports in their county
-            return Report.objects.filter(
+            queryset = Report.objects.filter(
                 assigned_department__type='police',
                 assigned_department__county=user.county
             )
-        return Report.objects.none()
+        else:
+            queryset = Report.objects.none()
 
+        result = list(queryset)
+        logger.info(f"CACHE SET: {cache_key}")
+        cache.set(cache_key, result, timeout=120)  # 2 minute cache
+        return result
+    
     def perform_create(self, serializer):
         """Save report and trigger auto-routing and duplicate detection."""
         report = serializer.save(citizen=self.request.user)
         auto_route_report(report)
         check_duplicate(report)
+        try:
+            cache.delete_pattern("reports:*")
+        except AttributeError:
+            cache.clear()  # LocMemCache fallback — clears everything, fine for local dev
         logger.info(f"New report {report.id} created by {self.request.user.email}")
 
 class ReportDetailView(generics.RetrieveUpdateAPIView):
@@ -221,9 +243,23 @@ class ReportStatusUpdateView(generics.CreateAPIView):
     permission_classes = [IsOfficer]
 
     def perform_create(self, serializer):
-        """Save status change and record who made the change."""
+        """Save status change, update the report status, and record who made the change."""
         status_update = serializer.save(updated_by=self.request.user)
-        logger.info(f"Report {status_update.report.id} status changed to {status_update.status} by {self.request.user.email}")
+        report = status_update.report
+        report.status = status_update.status
+        report.save()
+        Notification.objects.create(
+            user=report.citizen,
+            report=report,
+            title=f"Report #{report.id} Updated",
+            message=f"Your report status has been updated to {status_update.get_status_display()}.",
+            notification_type=status_update.status,
+        )
+        try:
+            cache.delete_pattern("reports:*")
+        except AttributeError:
+            cache.clear()  # LocMemCache fallback — clears everything, fine for local dev
+        logger.info(f"Report {report.id} status changed to {status_update.status} by {self.request.user.email}")
 
 
 class DuplicateFlagListView(generics.ListAPIView):

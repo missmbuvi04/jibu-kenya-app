@@ -13,6 +13,7 @@ from rest_framework import generics
 from .models import Department
 from .serializers import DepartmentSerializer
 from users.permissions import IsAdmin, IsAdminOrCountyOfficer
+from django.core.cache import cache
 
 
 class DepartmentListView(generics.ListCreateAPIView):
@@ -28,14 +29,24 @@ class DepartmentListView(generics.ListCreateAPIView):
     - Sets up new department for a county
     - Required before reports can be auto-routed
     """
-    queryset = Department.objects.filter(is_active=True)
     serializer_class = DepartmentSerializer
 
+    def get_queryset(self):
+        cached = cache.get('departments:active')
+        if cached is not None:
+            return cached
+        result = list(Department.objects.filter(is_active=True))
+        cache.set('departments:active', result, timeout=600)  # 10 minutes — rarely changes
+        return result
+
     def get_permissions(self):
-        """Different permissions for GET vs POST."""
         if self.request.method == 'POST':
-            return [IsAdmin()]  # Only admins can create departments
-        return [IsAdminOrCountyOfficer()]  # Officers can view
+            return [IsAdmin()]
+        return [IsAdminOrCountyOfficer()]
+
+    def perform_create(self, serializer):
+        serializer.save()
+        cache.delete('departments:active')
 
 
 class DepartmentDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -56,3 +67,11 @@ class DepartmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
     permission_classes = [IsAdmin]  # Only admins can modify
+
+    def perform_update(self, serializer):
+        serializer.save()
+        cache.delete('departments:active')
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        cache.delete('departments:active')
