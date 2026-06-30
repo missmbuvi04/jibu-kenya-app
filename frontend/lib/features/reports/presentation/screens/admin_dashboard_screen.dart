@@ -18,6 +18,7 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
     OfficerNavItem(icon: Icons.people_outline, label: 'User Management', route: AppRoutes.adminUsers),
     OfficerNavItem(icon: Icons.account_balance_outlined, label: 'Departments', route: AppRoutes.adminDepartments),
     OfficerNavItem(icon: Icons.history, label: 'Audit Logs', route: AppRoutes.adminAudit),
+    OfficerNavItem(icon: Icons.bar_chart_outlined, label: 'Analytics', route: AppRoutes.adminAnalytics),
   ];
 
   @override

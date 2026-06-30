@@ -55,7 +55,7 @@ final filtered = _searchQuery.isEmpty ? statusFiltered : statusFiltered.where((r
                 children: [
                   _statCard('$total', 'Total Reports', AppColors.teal, AppColors.tealLight),
                   const SizedBox(width: 16),
-                  _statCard('$pending', 'Pending', AppColors.amber, AppColors.amberLight),
+                  _statCard('$pending', 'submitted', AppColors.amber, AppColors.amberLight),
                   const SizedBox(width: 16),
                   _statCard('$inProgress', 'In Progress', AppColors.teal, AppColors.tealLight),
                   const SizedBox(width: 16),
@@ -177,7 +177,10 @@ const SizedBox(height: 14),
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: TextButton(
-                  onPressed: () => context.push(AppRoutes.countyOfficerReportDetail, extra: r),
+                  onPressed: () async {
+  await context.push(AppRoutes.countyOfficerReportDetail, extra: r);
+  ref.read(reportsProvider.notifier).refresh();
+},
                   child: const Text('View →', style: TextStyle(color: AppColors.teal, fontSize: 12)),
                 ),
               ),
