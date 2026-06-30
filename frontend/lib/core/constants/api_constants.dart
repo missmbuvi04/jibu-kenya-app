@@ -9,7 +9,7 @@ class ApiConstants {
   static String get baseUrl {
   if (kReleaseMode) return 'https://jibu-kenya-app.onrender.com';
   if (kIsWeb) return 'http://127.0.0.1:8000';
-  return 'http://192.168.1.88:8000';
+  return 'http:// 172.30.21.81:8000';
 }
 
   // Use this for Chrome web testing
