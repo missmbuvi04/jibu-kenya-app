@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/api_constants.dart';
@@ -7,10 +8,37 @@ final secureStorageProvider = Provider<SecureStorageService>((ref) {
 });
 
 class SecureStorageService {
+  // In-memory fallback for web — flutter_secure_storage uses Web Crypto
+  // which fails silently on first load in browser environments
+  static final Map<String, String> _memoryStore = {};
+
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
+
+  Future<void> _write(String key, String value) async {
+    if (kIsWeb) {
+      _memoryStore[key] = value;
+    } else {
+      await _storage.write(key: key, value: value);
+    }
+  }
+
+  Future<String?> _read(String key) async {
+    if (kIsWeb) {
+      return _memoryStore[key];
+    }
+    return await _storage.read(key: key);
+  }
+
+  Future<void> _deleteAll() async {
+    if (kIsWeb) {
+      _memoryStore.clear();
+    } else {
+      await _storage.deleteAll();
+    }
+  }
 
   // ── Tokens ──
 
@@ -19,17 +47,17 @@ class SecureStorageService {
     required String refreshToken,
   }) async {
     await Future.wait([
-      _storage.write(key: ApiConstants.accessTokenKey, value: accessToken),
-      _storage.write(key: ApiConstants.refreshTokenKey, value: refreshToken),
+      _write(ApiConstants.accessTokenKey, accessToken),
+      _write(ApiConstants.refreshTokenKey, refreshToken),
     ]);
   }
 
   Future<String?> getAccessToken() async {
-    return await _storage.read(key: ApiConstants.accessTokenKey);
+    return await _read(ApiConstants.accessTokenKey);
   }
 
   Future<String?> getRefreshToken() async {
-    return await _storage.read(key: ApiConstants.refreshTokenKey);
+    return await _read(ApiConstants.refreshTokenKey);
   }
 
   Future<bool> hasValidToken() async {
@@ -45,27 +73,27 @@ class SecureStorageService {
     required String county,
   }) async {
     await Future.wait([
-      _storage.write(key: ApiConstants.userIdKey, value: userId),
-      _storage.write(key: ApiConstants.userRoleKey, value: role),
-      _storage.write(key: ApiConstants.userCountyKey, value: county),
+      _write(ApiConstants.userIdKey, userId),
+      _write(ApiConstants.userRoleKey, role),
+      _write(ApiConstants.userCountyKey, county),
     ]);
   }
 
   Future<String?> getUserRole() async {
-    return await _storage.read(key: ApiConstants.userRoleKey);
+    return await _read(ApiConstants.userRoleKey);
   }
 
   Future<String?> getUserId() async {
-    return await _storage.read(key: ApiConstants.userIdKey);
+    return await _read(ApiConstants.userIdKey);
   }
 
   Future<String?> getUserCounty() async {
-    return await _storage.read(key: ApiConstants.userCountyKey);
+    return await _read(ApiConstants.userCountyKey);
   }
 
   // ── Clear ──
 
   Future<void> clearAll() async {
-    await _storage.deleteAll();
+    await _deleteAll();
   }
 }
