@@ -12,9 +12,10 @@ class ReportSerializer(serializers.ModelSerializer):
     latitude = serializers.FloatField(write_only=True, required=False)
     longitude = serializers.FloatField(write_only=True, required=False)
     citizen_id = serializers.IntegerField(source='citizen.id', read_only=True)
-
+    photo_reference = serializers.CharField(required=False, allow_null=True, allow_blank=True)
      # This line tells Django to send the real Cloudinary URL to Flutter!
     photo_reference = serializers.ImageField(use_url=True, required=False, allow_null=True)
+
 
     class Meta:
         model = Report
