@@ -13,6 +13,9 @@ class ReportSerializer(serializers.ModelSerializer):
     longitude = serializers.FloatField(write_only=True, required=False)
     citizen_id = serializers.IntegerField(source='citizen.id', read_only=True)
 
+     # This line tells Django to send the real Cloudinary URL to Flutter!
+    photo_reference = serializers.ImageField(use_url=True, required=False, allow_null=True)
+
     class Meta:
         model = Report
         fields = '__all__'
@@ -35,62 +38,6 @@ class ReportSerializer(serializers.ModelSerializer):
             validated_data['location'] = Point(lng, lat)
         return super().create(validated_data)
     
-    """Serialize Report model to/from JSON with geographic transformation.
-    
-    Accepts latitude/longitude in API request and converts to PostGIS Point geometry.
-    
-    Input fields (JSON):
-    - latitude: Y-coordinate (write-only, converted to location)
-    - longitude: X-coordinate (write-only, converted to location)
-    - category: 'roads', 'water', 'bridges', 'streetlights', 'public_facilities'
-    - description: Issue description text
-    - photo_reference: Photo file (optional, for duplicate detection)
-    - county: Geographic jurisdiction
-    
-    Output fields (JSON):
-    - location: GIS Point geometry (read-only, derived from lat/lng)
-    - photo_hash: Perceptual hash of photo (read-only, auto-computed)
-    - status: Current status (submitted → assigned → in_progress → resolved → closed)
-    - citizen: User who submitted the report (read-only)
-    - created_at: Submission timestamp (read-only)
-    - updated_at: Last modification timestamp (read-only)
-    
-    Example request:
-    {
-        "latitude": -1.2921,
-        "longitude": 36.8219,
-        "category": "roads",
-        "description": "Large pothole on Main Street",
-        "county": "Nairobi"
-    }
-    
-    Example response:
-    {
-        "id": 1,
-        "citizen": "citizen@example.com",
-        "category": "roads",
-        "description": "Large pothole on Main Street",
-        "location": {"type": "Point", "coordinates": [36.8219, -1.2921]},
-        "status": "assigned",
-        "county": "Nairobi",
-        "created_at": "2026-06-08T10:30:45Z",
-        "updated_at": "2026-06-08T10:35:20Z"
-    }
-    """
-    class Meta:
-        model = Report
-        fields = '__all__'
-        read_only_fields = ['citizen', 'photo_hash', 'created_at', 'updated_at']
-
-    def create(self, validated_data):
-        """Convert latitude/longitude to GIS Point before saving."""
-        lat = validated_data.pop('latitude')
-        lng = validated_data.pop('longitude')
-        # PostGIS Point uses (longitude, latitude) order
-        validated_data['location'] = Point(lng, lat)
-        return super().create(validated_data)
-
-
 class ReportStatusSerializer(serializers.ModelSerializer):
     """Serialize ReportStatus model - tracks status change history.
     

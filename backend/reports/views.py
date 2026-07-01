@@ -104,7 +104,11 @@ def check_duplicate(new_report):
     try:
         # Generate perceptual hash of the photo
         # pHash is robust to common image modifications (scaling, rotation, compression)
-        new_hash = imagehash.phash(Image.open(new_report.photo_reference.path))
+        
+        new_report.photo_reference.open()
+        new_hash = imagehash.phash(Image.open(new_report.photo_reference))
+        new_report.photo_reference.close()
+
         new_report.photo_hash = str(new_hash)
         new_report.save()
         logger.info(f"Computed perceptual hash for report {new_report.id}")
