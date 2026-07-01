@@ -26,15 +26,6 @@ class ReportsRepository {
   }
 
  Future<ReportModel> submitReport(SubmitReportRequest request) async {
-  if (request.photoUrl != null) {
-    // Cloudinary URL — send as JSON
-    final response = await _client.post(
-      ApiConstants.reports,
-      data: request.toJson(),
-    );
-    return ReportModel.fromJson(response.data as Map<String, dynamic>);
-  } else {
-    // No Cloudinary URL — send as FormData with file
     final formData = await request.toFormData();
     final response = await _client.postFormData(
       ApiConstants.reports,
@@ -42,7 +33,6 @@ class ReportsRepository {
     );
     return ReportModel.fromJson(response.data as Map<String, dynamic>);
   }
-}
 
   Future<void> updateReportStatus({
     required int reportId,

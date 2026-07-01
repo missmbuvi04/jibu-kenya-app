@@ -165,9 +165,10 @@ class SubmitReportRequest {
       'urgency': urgency,
       if (latitude != null) 'latitude': latitude.toString(),
       if (longitude != null) 'longitude': longitude.toString(),
+      if (photoUrl != null) 'photo_reference': photoUrl,
     };
 
-    if (photo != null) {
+    if (photo != null && photoUrl == null) {
       final bytes = await photo!.readAsBytes();
       map['photo_reference'] = MultipartFile.fromBytes(
         bytes,
