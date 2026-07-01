@@ -34,8 +34,10 @@ COPY . .
 
 # Collect static files (Django admin CSS/JS etc.) into STATIC_ROOT, so they can be served
 # Using --noinput so it doesn't hang waiting for confirmation during build
-RUN python manage.py collectstatic --noinput
 
 # Render sets the PORT environment variable dynamically; gunicorn must bind to it.
 # config.wsgi:application points to backend/config/wsgi.py's "application" object.
-CMD python manage.py migrate --noinput && (python manage.py createsuperuser --noinput || true) && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+CMD python manage.py migrate --noinput && \
+    python manage.py collectstatic --noinput && \
+    (python manage.py createsuperuser --noinput || true) && \
+    gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
