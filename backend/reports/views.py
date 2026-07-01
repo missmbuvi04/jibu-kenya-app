@@ -13,6 +13,8 @@ from notifications.models import Notification
 from users.permissions import IsCitizen, IsOfficer, IsAdminOrCountyOfficer
 from rest_framework.permissions import IsAuthenticated
 from django.core.cache import cache
+import hashlib
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -277,3 +279,23 @@ class DuplicateFlagListView(generics.ListAPIView):
     serializer_class = DuplicateFlagSerializer
     permission_classes = [IsAdminOrCountyOfficer]
     queryset = DuplicateFlag.objects.filter(resolved=False)  # Only show unresolved flags
+
+from django.conf import settings
+from rest_framework.decorators import api_view
+from rest_framework.response import Response as DRFResponse
+
+@api_view(['GET'])
+def cloudinary_signature(request):
+    timestamp = int(time.time())
+    folder = 'reports'
+    params_to_sign = f"folder={folder}&timestamp={timestamp}"
+    signature = hashlib.sha1(
+        f"{params_to_sign}{settings.CLOUDINARY_API_SECRET}".encode()
+    ).hexdigest()
+    return DRFResponse({
+        'signature': signature,
+        'timestamp': timestamp,
+        'cloud_name': settings.CLOUDINARY_CLOUD_NAME,
+        'api_key': settings.CLOUDINARY_API_KEY,
+        'folder': folder,
+    })

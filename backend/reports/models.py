@@ -47,7 +47,7 @@ class Report(models.Model):
     location = models.PointField(geography=True, null=True, blank=True, db_index=True)
     
     # Photo upload and perceptual hashing for duplicate detection
-    photo_reference = models.ImageField(upload_to='reports/', null=True, blank=True)
+    photo_reference = models.CharField(max_length=500, null=True, blank=True)
     photo_hash = models.CharField(max_length=255, null=True, blank=True)
     
     # Workflow status tracking

@@ -132,6 +132,7 @@ class SubmitReportRequest {
   final double? latitude;
   final double? longitude;
   final XFile? photo;
+  final String? photoUrl;
 
   const SubmitReportRequest({
     required this.category,
@@ -141,6 +142,7 @@ class SubmitReportRequest {
     this.latitude,
     this.longitude,
     this.photo,
+    this.photoUrl,
   });
 
   Map<String, dynamic> toJson() {
@@ -151,6 +153,7 @@ class SubmitReportRequest {
       'urgency': urgency,
       if (latitude != null) 'latitude': latitude.toString(),
       if (longitude != null) 'longitude': longitude.toString(),
+      if (photoUrl != null) 'photo_reference': photoUrl,
     };
   }
 

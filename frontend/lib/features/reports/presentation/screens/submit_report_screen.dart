@@ -11,7 +11,10 @@ import '../../../../core/router/app_router.dart';
 import '../../../../features/auth/domain/auth_provider.dart';
 import '../../../../core/services/permission_service.dart';
 import 'package:geolocator/geolocator.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/network/dio_client.dart';
 
 const List<String> _categories = [
   'roads',
@@ -191,46 +194,97 @@ if (mounted) {
       }
     }
   }
+  Future<String?> _uploadToCloudinary() async {
+  if (_selectedImage == null) return null;
+  try {
+    final client = ref.read(dioClientProvider);
+    final sigResponse = await client.get(ApiConstants.cloudinarySignature);
+    final sigData = sigResponse.data;
 
+    final cloudName = sigData['cloud_name'];
+    final apiKey = sigData['api_key'];
+    final signature = sigData['signature'];
+    final timestamp = sigData['timestamp'].toString();
+    final folder = sigData['folder'];
+
+    final uri = Uri.parse(
+        'https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+    final request = http.MultipartRequest('POST', uri);
+    request.fields['api_key'] = apiKey;
+    request.fields['timestamp'] = timestamp;
+    request.fields['signature'] = signature;
+    request.fields['folder'] = folder;
+
+    if (kIsWeb) {
+      final bytes = await _selectedImage!.readAsBytes();
+      request.files.add(http.MultipartFile.fromBytes(
+          'file', bytes,
+          filename: _selectedImage!.name));
+    } else {
+      request.files.add(
+          await http.MultipartFile.fromPath('file', _selectedImage!.path));
+    }
+
+    final streamResponse = await request.send();
+    final responseBody = await streamResponse.stream.bytesToString();
+    final json = jsonDecode(responseBody);
+
+    if (streamResponse.statusCode == 200) {
+      return json['secure_url'] as String;
+    }
+    return null;
+  } catch (e) {
+    debugPrint('Cloudinary upload error: $e');
+    return null;
+  }
+}
   Future<void> _submit() async {
-    if (_selectedCategory == null) {
-      _showValidationError('Please select a category');
-      return;
-    }
-
-    if (_descriptionController.text.trim().isEmpty) {
-      _showValidationError('Please add a description');
-      return;
-    }
-
-    if (_selectedImage == null) {
-      _showValidationError('Please upload a photo');
-      return;
-    }
-
-    final user = ref.read(authProvider).user;
-    final request = SubmitReportRequest(
-      category: _selectedCategory!,
-      description: _descriptionController.text.trim(),
-      county: user?.county ?? 'Nairobi',
-      urgency: _urgency,
-      latitude: _latitude,
-      longitude: _longitude,
-      photo: _selectedImage,
-    );
-
-    await ref.read(submitReportProvider.notifier).submit(request);
-
-    if (!mounted) return;
-    final state = ref.read(submitReportProvider);
-    if (state.isSuccess) {
-      context.pushReplacement(
-        AppRoutes.confirmation,
-        extra: state.submittedReport,
-      );
-    }
+  if (_selectedCategory == null) {
+    _showValidationError('Please select a category');
+    return;
+  }
+  if (_descriptionController.text.trim().isEmpty) {
+    _showValidationError('Please add a description');
+    return;
+  }
+  if (_selectedImage == null) {
+    _showValidationError('Please upload a photo');
+    return;
   }
 
+  String? cloudinaryUrl = await _uploadToCloudinary();
+  if (cloudinaryUrl == null && mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Photo upload failed — submitting without photo'),
+        backgroundColor: AppColors.amber,
+      ),
+    );
+  }
+
+  final user = ref.read(authProvider).user;
+  final request = SubmitReportRequest(
+    category: _selectedCategory!,
+    description: _descriptionController.text.trim(),
+    county: user?.county ?? 'Nairobi',
+    urgency: _urgency,
+    latitude: _latitude,
+    longitude: _longitude,
+    photo: cloudinaryUrl != null ? null : _selectedImage,
+    photoUrl: cloudinaryUrl,
+  );
+
+  await ref.read(submitReportProvider.notifier).submit(request);
+
+  if (!mounted) return;
+  final state = ref.read(submitReportProvider);
+  if (state.isSuccess) {
+    context.pushReplacement(
+      AppRoutes.confirmation,
+      extra: state.submittedReport,
+    );
+  }
+}
   void _showValidationError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

@@ -173,25 +173,15 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # ============================================================================
-# CLOUDINARY — Object Storage for incident photos
+# CLOUDINARY — credentials for direct Flutter upload
 # ============================================================================
-
-USE_CLOUDINARY = os.environ.get('USE_CLOUDINARY', '').lower() in ('true', '1', 'yes')
-print(f"DEBUG USE_CLOUDINARY={USE_CLOUDINARY}, raw={os.environ.get('USE_CLOUDINARY', 'NOT SET')}")
-
-if USE_CLOUDINARY:
-    for app in ['cloudinary_storage', 'cloudinary']:
-        if app not in INSTALLED_APPS:
-            INSTALLED_APPS.append(app)
-    CLOUDINARY_STORAGE = {
-        'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
-        'API_KEY': env('CLOUDINARY_API_KEY'),
-        'API_SECRET': env('CLOUDINARY_API_SECRET'),
-    }
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY', '')
+CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '')
 
 
 AUTH_USER_MODEL = 'users.User'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ============================================================================

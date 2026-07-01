@@ -24,6 +24,7 @@ class ApiConstants {
   static const String tokenRefresh = '/api/users/token/refresh/';
   static const String profile = '/api/users/profile/';
   static const String allUsers = '/api/users/all/';
+  static const String cloudinarySignature = '/api/reports/cloudinary-signature/';
 
   // Reports
   static const String reports = '/api/reports/';
