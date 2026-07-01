@@ -162,6 +162,12 @@ class ReportListCreateView(generics.ListCreateAPIView):
     """
     serializer_class = ReportSerializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            logger.error(f"Report validation failed: {serializer.errors}")
+        return super().create(request, *args, **kwargs)
+    
     def get_permissions(self):
         """Different permissions for GET vs POST."""
         if self.request.method == 'POST':
